@@ -1,118 +1,106 @@
-# Bug Fixing Using Cursor AI
+# Fixing a Buggy Python Script Using AI
 
-A practical software engineering and prompt engineering case study demonstrating how to identify, analyze, and fix critical program bugs using **Cursor AI** chain-prompting strategies.
+A structured case study in test-driven bug fixing and AI-assisted code review based on **Lecture 8**.
 
-- **Author**: Ayan Khan (Enrolment No: `25BCON1174`)
-- **Institution**: JECRC University, Department of Computer Science & Engineering
-- **GitHub Repository**: [https://github.com/ayankhanbebea-lgtm/bug-fixing-using-cursor-ai](https://github.com/ayankhanbebea-lgtm/bug-fixing-using-cursor-ai)
-
----
-
-## 1. Problem Statement
-The exercise evaluates an erroneous C/Python routine tasked with calculating the mathematical average of an integer array:
-
-```c
-#include <stdio.h>
-
-float average(int arr[], int n) {
-    int sum; 
-    for(int i = 0; i <= n; i++) {
-        sum += arr[i];
-    } 
-    return sum / n; 
-} 
-
-int main() {
-    int data[5] = {10, 20, 30, 40, 51}; 
-    printf("Average=%f\n", average(data, 5));
-    return 0;
-}
-```
-
-When compiled and executed, this program either crashes, produces unpredictable garbage numbers, or outputs an inaccurate truncated integer result.
+- **Author**: Ayan Khan
+- **Repository**: [https://github.com/ayankhanbebea-lgtm/bug-fixing-using-cursor-ai](https://github.com/ayankhanbebea-lgtm/bug-fixing-using-cursor-ai)
 
 ---
 
-## 2. Root Cause Bug Analysis
+## 1. Overview of `student_utils.py`
 
-Through systematic review in Cursor AI, three distinct runtime bugs were identified:
+`student_utils.py` provides utility functions for academic evaluation and student grading:
 
-| Bug # | Code Location | Nature of Bug | Runtime Impact | Fix Applied |
-|:---:|:---|:---|:---|:---|
-| **1** | `int sum;` | **Uninitialized Accumulator** | In C, local variables allocated on the stack hold indeterminate garbage values. Summing starts from an arbitrary non-zero number. | Initialized `int sum = 0;` (in Python: `total = 0.0`). |
-| **2** | `for(int i = 0; i <= n; i++)` | **Off-By-One / Buffer Overflow** | For an array of size $n=5$, valid indexes are $0, 1, 2, 3, 4$. The condition `i <= n` attempts to read `arr[5]`, accessing out-of-bounds memory. | Updated loop boundary to `i < n`. |
-| **3** | `return sum / n;` | **Integer Division Truncation** | Both `sum` and `n` are integers. Integer division truncates any fractional component before returning a `float`. | Cast accumulator before division: `(float)sum / n`. |
-
----
-
-## 3. Single-Prompt vs. Chain-Prompting Methodology
-
-In this study, two distinct prompt engineering strategies were tested:
-
-### Approach A: Single-Prompt Strategy
-- **Prompt**: `"Fix this code"`
-- **Result**: The AI generated a quick fix, but lacked structured justification, failed to annotate which changed line addressed which defect, and did not systematically trace edge cases.
-
-### Approach B: 3-Step Chain Prompting in Cursor AI
-1. **Step 1 (Audit & Bug Enumeration)**:
-   > *"You are a senior C language engineer reviewing code written by a second-year student. List every bug you find without fixing anything yet. Format as a numbered list with line numbers and one-line descriptions."*
-2. **Step 2 (Runtime Impact & Trace Analysis)**:
-   > *"For each bug you listed, explain in 2-3 lines what the program actually does at runtime because of it and what it was supposed to do. Do not give corrected code."*
-3. **Step 3 (Targeted Refactoring with Verification)**:
-   > *"Now provide the corrected version of the full program and add an inline comment on every line you change stating which bug number it fixes. Provide the exact expected output."*
-
-### Empirical Comparison Matrix
-
-| Evaluation Criteria | Single Prompt | Chain Prompting |
-|:---|:---:|:---:|
-| Bugs correctly identified | 5/5 | 5/5 |
-| Quality of runtime explanations | 4/5 | 5/5 |
-| Changed lines commented | 0/5 | 5/5 |
-| Correct expected output verification | 3/5 | 5/5 |
-| **Total Score** | **12/20** | **20/20** |
-
-**Conclusion**: Chain prompting broke down complex reasoning into deterministic phases, ensuring each bug was verified before edits were made.
+1. `calculate_average(marks)`: Calculates the arithmetic mean of a list of numeric marks.
+2. `is_passing(mark)`: Evaluates whether a given score meets or exceeds the minimum passing standard (`PASS_MARK = 40`).
+3. `get_grade(mark)`: Classifies a numeric mark into academic divisions:
+   - Mark $\ge 90$: `"Distinction"`
+   - Mark $\ge 60$: `"First"`
+   - Mark $\ge 45$: `"Second"`
+   - Mark $< 45$: `"Fail"`
 
 ---
 
-## 4. Verification & Testing
+## 2. Test Suite (`test_student_utils.py`)
 
-Expected output for dataset `{10, 20, 30, 40, 51}`:
-$$\text{Sum} = 10 + 20 + 30 + 40 + 51 = 151$$
-$$\text{Average} = \frac{151}{5} = 30.20$$
+The test suite consists of **EXACTLY 9 tests** written with Python's standard `unittest` framework:
 
-### Running the C Implementation:
+1. `test_average_three_marks`: Verifies `calculate_average([80, 90, 100])` produces `90.0`.
+2. `test_average_one_mark`: Verifies `calculate_average([40])` produces `40.0`.
+3. `test_average_two_marks`: Verifies `calculate_average([50, 70])` produces `60.0`.
+4. `test_pass_boundary`: Verifies exact passing boundary `is_passing(40)` returns `True`.
+5. `test_fail_below_boundary`: Verifies score below boundary `is_passing(39)` returns `False`.
+6. `test_pass_above_boundary`: Verifies score above boundary `is_passing(75)` returns `True`.
+7. `test_grade_distinction`: Verifies `get_grade(95)` returns `"Distinction"`.
+8. `test_grade_first`: Verifies `get_grade(65)` returns `"First"`.
+9. `test_grade_second`: Verifies `get_grade(50)` returns `"Second"`.
+
+---
+
+## 3. How to Run the Tests
+
+Execute the test suite using standard Python:
+
 ```bash
-gcc fixed_average.c -o fixed_average
-./fixed_average
+python test_student_utils.py
 ```
 
-### Running the Python Implementation:
-```bash
-python fixed_average.py
-```
+### Final Result:
+All **9 tests pass**:
 
-Output:
 ```text
-Dataset: [10, 20, 30, 40, 51]
-Corrected Average: 30.20
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.000s
 
-Running verification tests...
- PASS: Dataset [10, 20, 30, 40, 51] -> Average = 30.20 (Expected: 30.2)
- PASS: Dataset [5, 5, 5, 5] -> Average = 5.00 (Expected: 5.0)
- PASS: Dataset [0, 100] -> Average = 50.00 (Expected: 50.0)
- PASS: Dataset [-10, 10] -> Average = 0.00 (Expected: 0.0)
-All verification tests passed successfully!
+OK
 ```
+
+---
+
+## 4. The RED → FIX → GREEN Workflow
+
+The project strictly follows the standard Test-Driven Development (TDD) and AI-assisted debugging cycle:
+
+```mermaid
+flowchart LR
+    A["🔴 RED Stage<br/>Execute tests on buggy code<br/>(4 Failures, 1 Error)"] --> B["🤖 AI Debugging<br/>Prompt AI for root causes<br/>Identify targeted fixes"]
+    B --> C["🔧 FIX Stage<br/>Apply minimal targeted edits<br/>Preserve tests intact"]
+    C --> D["🟢 GREEN Stage<br/>Re-run 9 unit tests<br/>(9 passed, 0 failures)"]
+```
+
+1. **🔴 RED Stage**:
+   - The original `student_utils.py` contains 3 distinct defects.
+   - Running `python test_student_utils.py` against the original buggy script reveals 4 test failures and 1 runtime error (`ZeroDivisionError`).
+   - The raw failure output is logged in `evidence/red_test_output.txt`.
+
+2. **🤖 AI Debugging & 🔧 FIX Stage**:
+   - An AI assistant is prompted with individual failing test assertions to diagnose the root cause without blind rewriting.
+   - Bug 1: Corrected denominator from `len(marks) - 1` to `len(marks)`.
+   - Bug 2: Corrected boundary comparison from `mark > PASS_MARK` to `mark >= PASS_MARK`.
+   - Bug 3: Corrected ordering so `mark >= 90` ("Distinction") is evaluated before `mark >= 60` ("First").
+
+3. **🟢 GREEN Stage**:
+   - The unchanged test suite is re-executed against the corrected code.
+   - All 9 unit tests pass cleanly (`Ran 9 tests ... OK`).
+   - The passing execution log is preserved in `evidence/green_test_output.txt`.
 
 ---
 
 ## 5. Repository Structure
+
 ```text
 .
-├── buggy_average.c     # Original buggy C program
-├── fixed_average.c     # Corrected C program with inline bug annotations
-├── buggy_average.py    # Python representation of the buggy scenario
-├── fixed_average.py    # Python implementation with automated test assertions
-└── README.md           # Engineering documentation and comparison audit
+├── student_utils.py           # Corrected Python utility implementation
+├── test_student_utils.py      # 9 unit tests verifying all functions & edge cases
+├── bug_notes.md               # Detailed audit table & AI prompt transcripts
+├── audit.md                   # Complete repository compliance audit
+├── evidence/
+│   ├── red_test_output.txt    # Captured output during the failing RED stage
+│   └── green_test_output.txt  # Captured output during the passing GREEN stage
+├── buggy_average.c            # Legacy reference files preserved from initial commit
+├── buggy_average.py
+├── fixed_average.c
+├── fixed_average.py
+└── README.md                  # Project overview and workflow documentation
 ```

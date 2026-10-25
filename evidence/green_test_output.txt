@@ -1,0 +1,9 @@
+=== GREEN STAGE TEST OUTPUT ===
+Command: python test_student_utils.py
+Timestamp: Lecture 8 Green Stage Execution
+
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.000s
+
+OK
