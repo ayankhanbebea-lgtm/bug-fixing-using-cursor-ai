@@ -1,0 +1,55 @@
+=== RED STAGE TEST OUTPUT ===
+Command: python test_student_utils.py
+Timestamp: Lecture 8 Red Stage Execution
+
+EFF.F...F
+======================================================================
+ERROR: test_average_one_mark (__main__.TestStudentUtils.test_average_one_mark)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_student_utils.py", line 21, in test_average_one_mark
+    self.assertEqual(calculate_average(marks), 40.0)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "student_utils.py", line 16, in calculate_average
+    return total / (len(marks) - 1)
+           ~~~~~~^~~~~~~~~~~~~~~~~~
+ZeroDivisionError: division by zero
+
+======================================================================
+FAIL: test_average_three_marks (__main__.TestStudentUtils.test_average_three_marks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_student_utils.py", line 16, in test_average_three_marks
+    self.assertEqual(calculate_average(marks), 90.0)
+AssertionError: 135.0 != 90.0
+
+======================================================================
+FAIL: test_average_two_marks (__main__.TestStudentUtils.test_average_two_marks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_student_utils.py", line 26, in test_average_two_marks
+    self.assertEqual(calculate_average(marks), 60.0)
+AssertionError: 120.0 != 60.0
+
+======================================================================
+FAIL: test_grade_distinction (__main__.TestStudentUtils.test_grade_distinction)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_student_utils.py", line 42, in test_grade_distinction
+    self.assertEqual(get_grade(95), "Distinction")
+AssertionError: 'First' != 'Distinction'
+- First
++ Distinction
+
+======================================================================
+FAIL: test_pass_boundary (__main__.TestStudentUtils.test_pass_boundary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_student_utils.py", line 30, in test_pass_boundary
+    self.assertTrue(is_passing(40))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.001s
+
+FAILED (failures=4, errors=1)
